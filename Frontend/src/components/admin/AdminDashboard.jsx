@@ -64,6 +64,8 @@ const AdminDashboard = () => {
   };
 
   // 3. Call fetchData on component mount
+    // 3. Call fetchData on component mount
+
   useEffect(() => {
     fetchData();
   }, []);
