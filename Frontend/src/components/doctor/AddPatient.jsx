@@ -13,7 +13,7 @@ const doctorId = user?.id;
   const [currentStep, setCurrentStep] = useState(1);
   const [patientForm, setPatientForm] = useState({
     name: '',
-    age: 0,
+    age: '',
     gender: 'male',
     mobile: '',
     email: '',
@@ -23,7 +23,7 @@ const doctorId = user?.id;
   const [diagnosisForm, setDiagnosisForm] = useState({
     diagnosis: '',
     symptoms: '',
-    severityLevel: 'low'
+    // severityLevel: 'low'
   });
 
   // const [medications, setMedications] = useState([{

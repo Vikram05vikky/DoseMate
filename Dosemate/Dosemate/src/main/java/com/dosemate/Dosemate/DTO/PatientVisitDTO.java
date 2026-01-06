@@ -1,13 +1,23 @@
 package com.dosemate.Dosemate.DTO;
 
+import java.util.List;
+
 import com.dosemate.Dosemate.model.DoctorExamination;
 import com.dosemate.Dosemate.model.Medicine;
 import com.dosemate.Dosemate.model.OtherTreatment;
 
-import java.util.List;
-
 public class PatientVisitDTO
 {
+
+    private String phoneNo;
+
+public String getPhoneNo() {
+    return phoneNo;
+}
+
+public void setPhoneNo(String phoneNo) {
+    this.phoneNo = phoneNo;
+}
     public String getPatientName() {
         return patientName;
     }

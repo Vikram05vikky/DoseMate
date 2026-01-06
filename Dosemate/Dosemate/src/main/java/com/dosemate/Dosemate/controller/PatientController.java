@@ -1,16 +1,22 @@
 package com.dosemate.Dosemate.controller;
 
-import com.dosemate.Dosemate.DTO.PatientVisitDTO;
-import com.dosemate.Dosemate.model.PatientInfo;
-import com.dosemate.Dosemate.repo.PatientInfoRepository;
-import com.dosemate.Dosemate.service.PatientService;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.dosemate.Dosemate.DTO.PatientVisitDTO;
+import com.dosemate.Dosemate.model.PatientInfo;
+import com.dosemate.Dosemate.repo.PatientInfoRepository;
+import com.dosemate.Dosemate.service.PatientService;
 
 @RestController
 @RequestMapping("/api/patient")
@@ -55,6 +61,11 @@ public class PatientController {
         return patientService.getPatientById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{patientId}/prescriptions")
+    public PatientVisitDTO getPatientHistory(@PathVariable int patientId) {
+        return patientService.getPatientVisitHistory(patientId);
     }
 
 }

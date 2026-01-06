@@ -1,24 +1,35 @@
 package com.dosemate.Dosemate.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+
 @Entity
+
 public class PatientInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int patientId;
     private String name;
+    @Column(unique = true)
     private String phoneNo;
     private String email;
     private String whatsappNo;
-
+    private String preferredLanguage;
     private int age;
 
     // ✅ NEW FIELD 2: Gender
@@ -138,5 +149,13 @@ public class PatientInfo {
     public void setOtherTreatments(List<OtherTreatment> otherTreatments) {
         this.otherTreatments = otherTreatments;
     }
+    public String getPreferredLanguage() {
+    return preferredLanguage;
+    }
+
+    public void setPreferredLanguage(String preferredLanguage) {
+        this.preferredLanguage = preferredLanguage;
+    }
+
 
 }

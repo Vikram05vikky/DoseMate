@@ -1,16 +1,28 @@
 package com.dosemate.Dosemate.controller;
 
-import com.dosemate.Dosemate.DTO.ChangePasswordRequest;
-import com.dosemate.Dosemate.model.Admin;
-import com.dosemate.Dosemate.model.Doctor;
-import com.dosemate.Dosemate.model.PatientInfo;
-import com.dosemate.Dosemate.service.DoctorService;
-
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.dosemate.Dosemate.DTO.ChangePasswordRequest;
+import com.dosemate.Dosemate.model.Doctor;
+import com.dosemate.Dosemate.model.MedicineReminder;
+import com.dosemate.Dosemate.model.OtherReminder;
+import com.dosemate.Dosemate.model.PatientInfo;
+import com.dosemate.Dosemate.repo.MedicineReminderRepository;
+import com.dosemate.Dosemate.repo.OtherReminderRepository;
+import com.dosemate.Dosemate.service.DoctorService;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
@@ -19,6 +31,12 @@ public class DoctorController {
 
     @Autowired
     private DoctorService doctorService;
+    @Autowired
+private MedicineReminderRepository medicineReminderRepo;
+
+@Autowired
+private OtherReminderRepository otherReminderRepo;
+
 
     @PostMapping("/register")
     public ResponseEntity<Doctor> registerDoctor(@RequestBody Doctor doctor) {
@@ -109,5 +127,25 @@ public class DoctorController {
 
         return ResponseEntity.ok(patients);
     }
+
+    @GetMapping("/{doctorId}/prescriptions")
+public ResponseEntity<List<Object>> getDoctorPrescriptions(
+        @PathVariable int doctorId) {
+            Doctor doctor = doctorService.getDoctorById(doctorId)
+        .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+
+   List<MedicineReminder> medicines =
+        medicineReminderRepo.findByDoctorName(doctor.getDoctorName());
+
+List<OtherReminder> treatments =
+        otherReminderRepo.findByDoctorName(doctor.getDoctorName());
+
+    List<Object> allPrescriptions = new ArrayList<>();
+    allPrescriptions.addAll(medicines);
+    allPrescriptions.addAll(treatments);
+
+    return ResponseEntity.ok(allPrescriptions);
+}
 
 }

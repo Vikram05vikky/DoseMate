@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, User, Phone, Mail, Calendar, Eye, Edit2, CheckCircle, Clock, Loader2, X, Pill, Stethoscope } from 'lucide-react';
+import { Search, User, Phone, Mail, Calendar, Eye, Edit2, CheckCircle,ClipboardList, Clock, Loader2, X, Pill, Stethoscope } from 'lucide-react';
 
 const BASE_URL = 'http://localhost:8080';
 
 const PatientList = () => {
   const [patients, setPatients] = useState([]);
-  const [prescriptions, setPrescriptions] = useState([]);
+  // const [prescriptions, setPrescriptions] = useState([]);
+  // Used for patient cards (all patients summary)
+const [allPrescriptions, setAllPrescriptions] = useState([]);
+
+// Used ONLY inside history modal (selected patient)
+const [patientPrescriptions, setPatientPrescriptions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [currentDoctorId, setCurrentDoctorId] = useState(null);
@@ -18,6 +23,7 @@ const PatientList = () => {
   const [historyData, setHistoryData] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState('');
+  
 
   // 🧠 Load the logged-in doctor
   useEffect(() => {
@@ -39,6 +45,11 @@ const PatientList = () => {
         setLoading(true);
         setError('');
 
+        const prescriptionRes = await axios.get(
+  `${BASE_URL}/api/doctor/${currentDoctorId}/prescriptions`
+);
+setAllPrescriptions(prescriptionRes.data);
+
         // Fetch patients assigned to this doctor
         const patientResponse = await axios.get(`${BASE_URL}/api/doctor/${currentDoctorId}/patients`);
         setPatients(patientResponse.data);
@@ -46,8 +57,43 @@ const PatientList = () => {
         // Fetch all prescriptions (MedicineReminders and OtherReminders)
         // Assuming /api/patient/all returns a combined list or similar structure for reminders
         // This is necessary for the status and history views
-        const prescriptionResponse = await axios.get(`${BASE_URL}/api/patient/all`);
-        setPrescriptions(prescriptionResponse.data);
+//         const prescriptionResponse = await axios.get(`${BASE_URL}/api/patient/${patient.id}/prescriptions`);
+//         // setPrescriptions(prescriptionResponse.data);
+//         setPrescriptions([
+//   ...res.data.medicines,
+//   ...res.data.treatments
+// ]);
+// const fetchPatientHistory = async (patient) => {
+//   setSelectedPatient(patient);
+//   setShowHistoryModal(true);
+//   setHistoryLoading(true);
+//   setHistoryError('');
+//   setHistoryData([]);
+//   setPrescriptions([]); // reset old prescriptions
+
+//   try {
+//     // 1️⃣ Fetch prescription history
+//     const prescriptionRes = await axios.get(
+//       `${BASE_URL}/api/patient/${patient.id}/prescriptions`
+//     );
+
+//     setPrescriptions([
+//       ...(prescriptionRes.data.medicines || []),
+//       ...(prescriptionRes.data.treatments || [])
+//     ]);
+
+//     // 2️⃣ (Optional) Fetch generic history if you still use it
+//     // const historyRes = await axios.get(`${BASE_URL}/api/patient/history/${patient.phoneNo}`);
+//     // setHistoryData(historyRes.data);
+
+//   } catch (err) {
+//     console.error(err);
+//     setHistoryError("Failed to load patient history");
+//   } finally {
+//     setHistoryLoading(false);
+//   }
+// };
+
 
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -56,6 +102,8 @@ const PatientList = () => {
         setLoading(false);
       }
     };
+
+    
 
     fetchData();
   }, [currentDoctorId]);
@@ -68,163 +116,321 @@ const PatientList = () => {
 
   // 💊 Helper functions
   const getPatientStatus = (patientId) => {
-    const patientPrescriptions = prescriptions.filter((p) => p.patientId === patientId);
-    const hasActive = patientPrescriptions.some((p) => p.status === 'active');
-    return hasActive ? 'active' : 'completed';
-  };
+  const patientData = allPrescriptions.filter(
+    p => p.patientId === patientId
+  );
+  const hasActive = patientData.some(p => p.status === 'active');
+  return hasActive ? 'active' : 'completed';
+};
 
   const getPatientPrescriptionCount = (patientId) => {
-    // Counts both medicine and other treatment reminders
-    return prescriptions.filter((p) => p.patientId === patientId).length;
-  };
+  return allPrescriptions.filter(p => p.patientId === patientId).length;
+};
+
   
   // Function to fetch patient history and open modal
+  // const fetchPatientHistory = async (patient) => {
+  //   if (!patient.phoneNo) {
+  //     setHistoryError('Patient phone number is missing. Cannot fetch history.');
+  //     setHistoryData([]);
+  //     setSelectedPatient(patient);
+  //     setShowHistoryModal(true);
+  //     return;
+  //   }
+
+  //   setHistoryLoading(true);
+  //   setHistoryError('');
+  //   setHistoryData([]);
+  //   setSelectedPatient(patient);
+  //   setShowHistoryModal(true);
+
+  //   try {
+  //     const historyResponse = await axios.get(`${BASE_URL}/api/patient/history/${patient.phoneNo}`);
+  //     // Sort history data by date/ID descending to show latest first
+  //     const sortedHistory = historyResponse.data.sort((a, b) => (b.historyId || 0) - (a.historyId || 0));
+  //     setHistoryData(sortedHistory);
+  //   } catch (err) {
+  //     console.error('Error fetching patient history:', err);
+  //     if (err.response && err.response.status === 404) {
+  //       setHistoryError('No generic text history found for this patient.');
+  //     } else {
+  //       setHistoryError('Failed to fetch patient history. Check console for details.');
+  //     }
+  //     setHistoryData([]);
+  //   } finally {
+  //     setHistoryLoading(false);
+  //   }
+  // };
+
   const fetchPatientHistory = async (patient) => {
-    if (!patient.phoneNo) {
-      setHistoryError('Patient phone number is missing. Cannot fetch history.');
-      setHistoryData([]);
-      setSelectedPatient(patient);
-      setShowHistoryModal(true);
-      return;
-    }
+  if (!patient?.patientId) {
+    setHistoryError("Patient ID missing");
+    return;
+  }
 
-    setHistoryLoading(true);
-    setHistoryError('');
-    setHistoryData([]);
-    setSelectedPatient(patient);
-    setShowHistoryModal(true);
+  setSelectedPatient(patient);
+  setShowHistoryModal(true);
+  setHistoryLoading(true);
+  setHistoryError('');
+  setHistoryData([]);
+  setPatientPrescriptions([]);
 
-    try {
-      const historyResponse = await axios.get(`${BASE_URL}/api/patient/history/${patient.phoneNo}`);
-      // Sort history data by date/ID descending to show latest first
-      const sortedHistory = historyResponse.data.sort((a, b) => (b.historyId || 0) - (a.historyId || 0));
-      setHistoryData(sortedHistory);
-    } catch (err) {
-      console.error('Error fetching patient history:', err);
-      if (err.response && err.response.status === 404) {
-        setHistoryError('No generic text history found for this patient.');
-      } else {
-        setHistoryError('Failed to fetch patient history. Check console for details.');
-      }
-      setHistoryData([]);
-    } finally {
-      setHistoryLoading(false);
-    }
-  };
+  try {
+    const historyRes = await axios.get(
+      `${BASE_URL}/api/patient/history/${patient.phoneNo}`
+    );
+    setHistoryData(historyRes.data || []);
+
+    const prescriptionRes = await axios.get(
+      `${BASE_URL}/api/patient/${patient.patientId}/prescriptions`
+    );
+
+    setPatientPrescriptions([
+      ...(prescriptionRes.data.medicines || []),
+      ...(prescriptionRes.data.treatments || [])
+    ]);
+  } catch (err) {
+    console.error(err);
+    setHistoryError("Failed to load patient history");
+  } finally {
+    setHistoryLoading(false);
+  }
+};
+
 
   // History Modal Component (Inline)
-  const HistoryModal = ({ patient, history, loading, error, prescriptions, onClose }) => {
-    if (!showHistoryModal || !patient) return null;
+  // const HistoryModal = ({ patient, history, loading, error, prescriptions, onClose }) => {
+  //   if (!showHistoryModal || !patient) return null;
 
-    // Filter the global prescription state to get only this patient's prescriptions
-    const patientPrescriptions = prescriptions.filter(p => p.patientId === patient.id);
+  //   // Filter the global prescription state to get only this patient's prescriptions
+  //   // const patientPrescriptions = prescriptions.filter(p => p.patientId === patient.id);
+  //   // const patientPrescriptions = patientPrescriptions;
+  //   // patientPrescriptions.map(...)
+  //   const displayPrescriptions = prescriptions || [];
+  //   const diagnosisData = patient.doctorExaminations || [];
     
-    return (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-        <div className="relative bg-white rounded-xl shadow-2xl p-6 w-full md:w-2/3 lg:w-3/4 max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100">
+  //   return (
+  //     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+  //       <div className="relative bg-white rounded-xl shadow-2xl p-6 w-full md:w-2/3 lg:w-3/4 max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100">
           
-          {/* Modal Header */}
-          <div className="flex justify-between items-center pb-4 border-b border-gray-200 sticky top-0 bg-white z-10">
-            <h3 className="text-2xl font-bold text-gray-900">
-              <span className="text-blue-600 mr-2">Patient Records:</span> {patient.name}
-            </h3>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-              aria-label="Close"
-            >
-              <X className="h-6 w-6" />
-            </button>
-          </div>
+  //         {/* Modal Header */}
+  //         <div className="flex justify-between items-center pb-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+  //           <h3 className="text-2xl font-bold text-gray-900">
+  //             <span className="text-blue-600 mr-2">Patient Records:</span> {patient.name}
+  //           </h3>
+  //           <button
+  //             onClick={onClose}
+  //             className="text-gray-400 hover:text-gray-600 transition-colors"
+  //             aria-label="Close"
+  //           >
+  //             <X className="h-6 w-6" />
+  //           </button>
+  //         </div>
 
-          <div className="mt-4 space-y-8">
-            {/* 1. Generic History Entries */}
-            <div className="bg-gray-50 p-4 rounded-xl">
-                <h4 className="text-xl font-semibold mb-4 border-b pb-2 text-gray-700 flex items-center">
-                    <Stethoscope className="h-5 w-5 mr-2 text-blue-600"/> Consultation Notes
-                </h4>
-                {loading || historyLoading ? (
-                    <div className="text-center text-gray-500 py-4"><Loader2 className="animate-spin h-5 w-5 inline mr-2" /> Loading generic history...</div>
-                ) : error || historyError ? (
-                    <p className="bg-red-100 p-3 rounded text-red-700">{error || historyError}</p>
-                ) : history.length === 0 ? (
-                    <p className="text-gray-500">No general consultation notes found.</p>
-                ) : (
-                    <div className="space-y-4">
-                        {history.map((entry, index) => (
-                            <div key={index} className="border-l-4 border-blue-400 pl-4 bg-white p-4 shadow-md rounded-lg">
-                                <p className="text-xs font-medium text-gray-500 mb-1">
-                                    {entry.patientHistory.split('\n')[0].includes('Initial Visit') ? 'Initial Registration' : `Visit Entry ${history.length - index}`}
-                                </p>
-                                <p className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed">
-                                    {entry.patientHistory}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+  //         <div className="mt-4 space-y-8">
+  //           {/* 1. Generic History Entries */}
+  //           <div className="bg-gray-50 p-4 rounded-xl">
+  //               <h4 className="text-xl font-semibold mb-4 border-b pb-2 text-gray-700 flex items-center">
+  //                   <Stethoscope className="h-5 w-5 mr-2 text-blue-600"/> Consultation Notes
+  //               </h4>
+  //               {loading || historyLoading ? (
+  //                   <div className="text-center text-gray-500 py-4"><Loader2 className="animate-spin h-5 w-5 inline mr-2" /> Loading generic history...</div>
+  //               ) : error || historyError ? (
+  //                   <p className="bg-red-100 p-3 rounded text-red-700">{error || historyError}</p>
+  //               ) : history.length === 0 ? (
+  //                   <p className="text-gray-500">No general consultation notes found.</p>
+  //               ) : (
+  //                   <div className="space-y-4">
+  //                       {history.map((entry, index) => (
+  //                           <div key={index} className="border-l-4 border-blue-400 pl-4 bg-white p-4 shadow-md rounded-lg">
+  //                               <p className="text-xs font-medium text-gray-500 mb-1">
+  //                                   {entry.patientHistory.split('\n')[0].includes('Initial Visit') ? 'Initial Registration' : `Visit Entry ${history.length - index}`}
+  //                               </p>
+  //                               <p className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed">
+  //                                   {entry.patientHistory}
+  //                               </p>
+  //                           </div>
+  //                       ))}
+  //                   </div>
+  //               )}
+  //           </div>
 
-            {/* 2. Prescriptions (Medicines & Treatments) */}
-            <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-md">
-                <h4 className="text-xl font-semibold mb-4 border-b pb-2 text-gray-700 flex items-center">
-                    <Pill className="h-5 w-5 mr-2 text-green-600"/> Medication & Treatment History
-                </h4>
-                {patientPrescriptions.length === 0 ? (
-                    <p className="text-gray-500">No prescriptions recorded for this patient.</p>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
-                            <thead className="bg-blue-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Type / Name</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Time/Session</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Dosage / Method</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Total Days/Qty</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Start/Reminder Date</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-100">
-                                {patientPrescriptions.map((p, pIndex) => (
-                                    <tr key={pIndex} className={p.status === 'active' ? 'bg-green-50/50 hover:bg-green-100' : 'hover:bg-gray-50'}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            <span className={`px-2 py-0.5 rounded-full text-xs mr-2 ${p.medicineName ? 'bg-indigo-100 text-indigo-800' : 'bg-pink-100 text-pink-800'}`}>
-                                                {p.medicineName ? 'Medicine' : 'Treatment'}
-                                            </span>
-                                            {p.medicineName || p.treatmentName}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{p.session}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{p.quantityPerSession || p.takingmethod || 'N/A'}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                            {p.totalQuantity ? `${p.totalQuantity} units` : 'N/A'}
-                                            {p.startDate && p.lastDate && (
-                                                <span className="block text-xs text-gray-500">
-                                                    ({(new Date(p.lastDate).getTime() - new Date(p.startDate).getTime()) / (1000 * 60 * 60 * 24) + 1} days)
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                                            {p.startDate ? new Date(p.startDate).toLocaleDateString() : new Date(p.dateOfReminder).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${p.status === 'active' ? 'bg-green-200 text-green-800' : 'bg-gray-200 text-gray-800'}`}>
-                                                {p.status || 'N/A'}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
+  //           {/* 2. Prescriptions (Medicines & Treatments) */}
+  //           <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-md">
+  //               <h4 className="text-xl font-semibold mb-4 border-b pb-2 text-gray-700 flex items-center">
+  //                   <Pill className="h-5 w-5 mr-2 text-green-600"/> Medication & Treatment History
+  //               </h4>
+  //               {patientPrescriptions.length === 0 ? (
+  //                   <p className="text-gray-500">No prescriptions recorded for this patient.</p>
+  //               ) : (
+  //                   <div className="overflow-x-auto">
+  //                       <table className="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+  //                           <thead className="bg-blue-50">
+  //                               <tr>
+  //                                   <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Type / Name</th>
+  //                                   <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Time/Session</th>
+  //                                   <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Dosage / Method</th>
+  //                                   <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Total Days/Qty</th>
+  //                                   <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Start/Reminder Date</th>
+  //                                   <th className="px-6 py-3 text-left text-xs font-medium text-blue-800 uppercase tracking-wider">Status</th>
+  //                               </tr>
+  //                           </thead>
+  //                           <tbody className="bg-white divide-y divide-gray-100">
+  //                               {displayPrescriptions.map((p, pIndex) => (
+  //                                   <tr key={pIndex} className={p.status === 'active' ? 'bg-green-50/50 hover:bg-green-100' : 'hover:bg-gray-50'}>
+  //                                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+  //                                           <span className={`px-2 py-0.5 rounded-full text-xs mr-2 ${p.medicineName ? 'bg-indigo-100 text-indigo-800' : 'bg-pink-100 text-pink-800'}`}>
+  //                                               {p.medicineName ? 'Medicine' : 'Treatment'}
+  //                                           </span>
+  //                                           {p.medicineName || p.treatmentName}
+  //                                       </td>
+  //                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{p.session}</td>
+  //                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{p.quantityPerSession || p.takingmethod || 'N/A'}</td>
+  //                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+  //                                           {p.totalQuantity ? `${p.totalQuantity} units` : 'N/A'}
+  //                                           {p.startDate && p.lastDate && (
+  //                                               <span className="block text-xs text-gray-500">
+  //                                                   ({(new Date(p.lastDate).getTime() - new Date(p.startDate).getTime()) / (1000 * 60 * 60 * 24) + 1} days)
+  //                                               </span>
+  //                                           )}
+  //                                       </td>
+  //                                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+  //                                           {p.startDate ? new Date(p.startDate).toLocaleDateString() : new Date(p.dateOfReminder).toLocaleDateString()}
+  //                                       </td>
+  //                                       <td className="px-6 py-4 whitespace-nowrap">
+  //                                           <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${p.status === 'active' ? 'bg-green-200 text-green-800' : 'bg-gray-200 text-gray-800'}`}>
+  //                                               {p.status || 'N/A'}
+  //                                           </span>
+  //                                       </td>
+  //                                   </tr>
+  //                               ))}
+  //                           </tbody>
+  //                       </table>
+  //                   </div>
+  //               )}
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // };
+const HistoryModal = ({ patient, history, loading, error, prescriptions, onClose }) => {
+  if (!showHistoryModal || !patient) return null;
+
+  // const displayPrescriptions = prescriptions || [];
+
+  const displayPrescriptions = [...(prescriptions || [])].sort((a, b) => 
+    new Date(b.startDate) - new Date(a.startDate)
+);
+  
+  // Extract Primary Diagnosis and Date
+  // const primaryExam = patient.doctorExaminations?.[0] || {};
+  // const diagnosis = primaryExam.diagnosis || 'N/A';
+  // const symptoms = primaryExam.symptoms || 'N/A';
+
+  const examList = patient.doctorExaminations || [];
+  const primaryExam = examList.length > 0 ? examList[0] : null;
+  const diagnosis = primaryExam?.diagnosis || 'No Diagnosis';
+  const symptoms = primaryExam?.symptoms || 'No Symptoms reported';
+  
+  // Format Date (using registeredDate or startDate as a fallback)
+  const formattedDate = patient.registeredDate 
+    ? new Date(patient.registeredDate).toLocaleDateString() 
+    : 'N/A';
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+      <div className="relative bg-white rounded-xl shadow-2xl p-6 w-full md:w-11/12 lg:w-full max-w-7xl max-h-[90vh] overflow-y-auto">
+        
+        {/* Modal Header */}
+        <div className="flex justify-between items-center pb-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+          <h3 className="text-2xl font-bold text-gray-900">
+            <span className="text-blue-600 mr-2">Medical History:</span> {patient.name}
+          </h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+
+        <div className="mt-6">
+          {loading || historyLoading ? (
+            <div className="text-center py-20"><Loader2 className="animate-spin h-10 w-10 text-blue-600 mx-auto" /></div>
+          ) : displayPrescriptions.length === 0 ? (
+            <div className="text-center py-10 bg-gray-50 rounded-lg border-2 border-dashed">
+              <p className="text-gray-500">No medical records found for this patient.</p>
             </div>
-          </div>
+          ) : (
+            <div className="overflow-x-auto border rounded-xl shadow-sm">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-slate-800">
+                  <tr>
+                    <th className="px-3 py-4 text-left text-xs font-bold text-white uppercase">Date</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-white uppercase">Diagnosis</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-white uppercase">Symptoms</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-white uppercase">Medication</th>
+                    <th className="px-3 py-4 text-left text-xs font-bold text-white uppercase">Dosage</th>
+                    <th className="px-3 py-4 text-left text-xs font-bold text-white uppercase">Duration</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-white uppercase">Instruction</th>
+                    <th className="px-3 py-4 text-left text-xs font-bold text-white uppercase">Timing</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-100">
+                  {displayPrescriptions.map((p, pIndex) => (
+                    <tr key={pIndex} className="hover:bg-blue-50/50 transition-colors">
+                      {/* 1. Date */}
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {p.startDate ? new Date(p.startDate).toLocaleDateString() : formattedDate}
+                      </td>
+
+                      {/* 2. Diagnosis */}
+                      <td className="px-4 py-4 text-sm font-bold text-slate-900 min-w-[150px]">
+                        {diagnosis}
+                      </td>
+
+                      {/* 3. Symptoms */}
+                      <td className="px-4 py-4 text-sm text-gray-600 italic min-w-[150px]">
+                        {symptoms}
+                      </td>
+
+                      {/* 4. Medication */}
+                      <td className="px-4 py-4 text-sm font-semibold text-blue-700">
+                        {p.medicineName || p.treatmentName}
+                      </td>
+
+                      {/* 5. Dosage */}
+                      <td className="px-3 py-4 text-sm text-gray-700">
+                        {p.quantityPerSession || 'N/A'}
+                      </td>
+
+                      {/* 6. Duration */}
+                      <td className="px-3 py-4 text-sm text-gray-700">
+                         {p.totalQuantity} units
+                      </td>
+
+                      {/* 7. Instruction */}
+                      <td className="px-4 py-4 text-sm text-gray-600">
+                        <span className="capitalize bg-gray-100 px-2 py-1 rounded">
+                          {p.takingmethod || 'As directed'}
+                        </span>
+                      </td>
+
+                      {/* 8. Timing */}
+                      <td className="px-3 py-4 whitespace-nowrap">
+                        <span className="bg-indigo-100 text-indigo-700 px-2.5 py-1 rounded-md text-xs font-bold">
+                          {p.session || 'N/A'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
-    );
-  };
-
+    </div>
+  );
+};
   // ⏳ Loading state
   if (loading) {
     return (
@@ -377,7 +583,7 @@ const PatientList = () => {
           history={historyData} 
           loading={historyLoading}
           error={historyError}
-          prescriptions={prescriptions}
+          prescriptions={patientPrescriptions}
           onClose={() => setShowHistoryModal(false)} 
         />
       )}
