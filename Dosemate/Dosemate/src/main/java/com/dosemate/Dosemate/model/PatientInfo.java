@@ -32,6 +32,7 @@ public class PatientInfo {
     private String preferredLanguage;
     private int age;
 
+
     // ✅ NEW FIELD 2: Gender
     private String gender;
 

@@ -1,6 +1,14 @@
 package com.dosemate.Dosemate.model;
 
-import jakarta.persistence.*;
+import java.util.Date;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 
 @Entity
 public class PatientHistory {
@@ -11,6 +19,8 @@ public class PatientHistory {
 
     private String phoneNo;
     private String patientName;
+     @Temporal(TemporalType.TIMESTAMP)
+    private Date createdDate;
 
     @Lob
     private String patientHistory; // store doctor's notes or history text
@@ -42,4 +52,13 @@ public class PatientHistory {
     public void setPatientHistory(String patientHistory) {
         this.patientHistory = patientHistory;
     }
+
+    public Date getCreatedDate() {
+    return createdDate;
+}
+
+public void setCreatedDate(Date createdDate) {
+    this.createdDate = createdDate;
+}
+
 }

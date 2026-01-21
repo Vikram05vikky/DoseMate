@@ -109,6 +109,7 @@
 
 package com.dosemate.Dosemate.controller;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -194,6 +195,7 @@ public ResponseEntity<?> getPatientHistoryByPhone(@PathVariable String phoneNo) 
         phoneNo = normalizePhone(phoneNo);
         String patientName = request.get("patientName");
         String patientHistoryText = request.get("patientHistory");
+        
 
         // Check if phone number exists
         Optional<PatientInfo> patients = patientInfoRepository.findByPhoneNo(phoneNo);
@@ -215,6 +217,7 @@ public ResponseEntity<?> getPatientHistoryByPhone(@PathVariable String phoneNo) 
         patientHistory.setPhoneNo(phoneNo);
         patientHistory.setPatientName(patientName);
         patientHistory.setPatientHistory(patientHistoryText);
+        patientHistory.setCreatedDate(new Date());
 
         patientHistoryRepository.save(patientHistory);
 

@@ -26,4 +26,6 @@ public interface MedicineReminderRepository extends JpaRepository<MedicineRemind
     long countDistinctPatients();
 
        List<MedicineReminder> findByDoctorName(String doctorName);
+
+       List<MedicineReminder> findByPatientId(int patientId);
 }

@@ -11,14 +11,23 @@ const AddPatient = () => {
   const { user } = useApp();
 const doctorId = user?.id;
   const [currentStep, setCurrentStep] = useState(1);
-  const [patientForm, setPatientForm] = useState({
-    name: '',
-    age: '',
-    gender: 'male',
-    mobile: '',
-    email: '',
-    address: ''
-  });
+  // const [patientForm, setPatientForm] = useState({
+  //   name: '',
+  //   age: '',
+  //   gender: 'male',
+  //   mobile: '',
+  //   email: '',
+  //   address: ''
+  // });
+const [patientForm, setPatientForm] = useState({
+  name: '',
+  age: '',
+  gender: 'male',
+  mobile: '',
+  email: '',
+  address: '',
+  preferredLanguage: 'english' // ✅ NEW
+});
 
   const [diagnosisForm, setDiagnosisForm] = useState({
     diagnosis: '',
@@ -26,14 +35,6 @@ const doctorId = user?.id;
     // severityLevel: 'low'
   });
 
-  // const [medications, setMedications] = useState([{
-  //   name: '',
-  //   quantity: '',
-  //   sessionsPerDay: 1,
-  //   foodTiming: 'before',
-  //   dosage: '',
-  //   duration: ''
-  // }]);
 
   const [medications, setMedications] = useState([{
         name: '',
@@ -76,25 +77,6 @@ const doctorId = user?.id;
     }
   };
 
-  // const handleMedicationChange = (index, field, value) => {
-  //   const updated = medications.map((med, i) =>
-  //     i === index ? { ...med, [field]: value } : med
-  //   );
-  //   setMedications(updated);
-  // };
-
-  // const validateStep = (step) => {
-  //   switch (step) {
-  //     case 1:
-  //       return patientForm.name && patientForm.age > 0 && patientForm.mobile && patientForm.email;
-  //     case 2:
-  //       return diagnosisForm.diagnosis && diagnosisForm.symptoms;
-  //     case 3:
-  //       return medications.every(m => m.name && m.quantity && m.dosage && m.duration);
-  //     default:
-  //       return false;
-  //   }
-  // };
 
   const handleMedicationChange = (index, field, value) => {
         const updated = medications.map((med, i) =>
@@ -127,6 +109,7 @@ const doctorId = user?.id;
         phoneNo: patientForm.mobile,
         email: patientForm.email,
         whatsappNo: patientForm.mobile,
+         preferredLanguage: patientForm.preferredLanguage,
         doctorExaminations: [{
           diagnosis: diagnosisForm.diagnosis,
           symptoms: diagnosisForm.symptoms,
@@ -158,7 +141,7 @@ const doctorId = user?.id;
 
       // Reset forms
       setCurrentStep(1);
-      setPatientForm({ name: '', age: 0, gender: 'male', mobile: '', email: '', address: '' });
+      setPatientForm({ name: '', age: 0, gender: 'male', mobile: '', email: '', address: '',preferredLanguage: 'english' });
       setDiagnosisForm({ diagnosis: '', symptoms: '', severityLevel: 'low' });
       setMedications([{ name: '', quantity: '', sessionsPerDay: 1, foodTiming: 'before', dosage: '', duration: '' }]);
 
@@ -272,8 +255,35 @@ const doctorId = user?.id;
                   placeholder="Enter complete address"
                 />
               </div>
+              <div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Preferred Language
+  </label>
+
+  <select
+    value={patientForm.preferredLanguage}
+    onChange={e =>
+      setPatientForm({
+        ...patientForm,
+        preferredLanguage: e.target.value
+      })
+    }
+    className="w-full px-4 py-2 border border-gray-300 rounded-lg 
+               focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+  >
+    <option value="english">English</option>
+    <option value="tamil">Tamil</option>
+    <option value="hindi">Hindi</option>
+    <option value="telugu">Telugu</option>
+    <option value="kannada">Kannada</option>
+    <option value="malayalam">Malayalam</option>
+  </select>
+</div>
+
             </div>
           </div>
+
+          
         )}
 
         {/* Step 2: Diagnosis */}
@@ -348,31 +358,7 @@ const doctorId = user?.id;
                     placeholder="Total Quantity"
                     className="w-full px-4 py-2 border rounded-lg"
                   />
-                  {/* <input
-                    type="number"
-                    value={med.sessionsPerDay}
-                    onChange={e => handleMedicationChange(index, 'sessionsPerDay', e.target.value)}
-                    placeholder="Sessions/Day"
-                    className="w-full px-4 py-2 border rounded-lg"
-                  /> */}
-                  {/* <input
-                    type="number"
-                    value={med.sessionsPerDay} // This is the numerical input
-                    onChange={e => handleMedicationChange(index, 'sessionsPerDay', e.target.value)}
-                    placeholder="Sessions/Day"
-                    className="w-full px-4 py-2 border rounded-lg"
-                  /> */}
-
-                    {/* <select
-                    value={med.sessionsPerDay} // Reusing sessionsPerDay state key
-                    onChange={e => handleMedicationChange(index, 'sessionsPerDay', e.target.value)}
-                    className="w-full px-4 py-2 border rounded-lg"
-                  >
-                    <option value="Morning">Morning</option>
-                    <option value="Afternoon">Afternoon</option>
-                    <option value="Evening">Evening</option>
-                    <option value="Night">Night</option>
-                  </select> */}
+                 
 <select
   value={med.sessionTiming} // <-- CORRECTED: Bind to the sessionTiming state
   onChange={e => handleMedicationChange(index, 'sessionTiming', e.target.value)} // <-- CORRECTED: Update the sessionTiming state

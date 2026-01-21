@@ -1,14 +1,17 @@
 package com.dosemate.Dosemate.controller;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.dosemate.Dosemate.model.PatientHistory;
 import com.dosemate.Dosemate.repo.PatientHistoryRepository;
 import com.dosemate.Dosemate.service.OlamaService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/olama")
@@ -60,25 +63,55 @@ public class OlamaController {
         String patientPastHistory = latestHistory.getPatientHistory();
 
         // 4️⃣ Create a detailed prompt for Ollama
-        String combinedPrompt = String.format("""
-                You are an AI medical assistant.
-                Analyze the following patient's past medical history and the current reported problem.
+       String combinedPrompt = String.format("""
+You are an AI medical assistant.
 
-                🧍‍♂️ Patient Name: %s
-                📞 Phone No: %s
+Analyze the patient's details and generate a structured medical report.
 
-                🩺 Past Medical History:
-                %s
+IMPORTANT RULE:
+Every subheading listed below MUST be included in your response.
+Do not skip any section. If information is missing, mention "Insufficient information available".
 
-                🚨 Current Problem:
-                %s
+Patient Details
+Name: %s
 
-                Based on the above:
-                1. Check if the current problem may be related to the past medical history.
-                2. Suggest possible causes or related conditions.
-                3. Suggest any necessary lab tests or diagnostics — explain briefly *why each test is relevant*.
-                4. Provide the reasoning clearly in 4 to 6 lines.
-                """, patientName, phoneNo, patientPastHistory, currentProblem);
+Past Medical History
+%s
+
+Current Complaint
+%s
+
+Report Subheadings (ALL MUST BE PRESENT)
+
+1. Clinical Summary
+
+2. Correlation Analysis
+
+3. Possible Causes and Differential Diagnosis
+
+4. Recommended Lab Tests and Diagnostics
+
+5. Risk Assessment
+
+6. Treatment Suggestions (General Guidance Only)
+
+7. Follow-up Advice
+
+8. Preventive Measures
+
+9. Patient Education
+
+10. Disclaimer
+
+Instructions
+Use clear headings.
+Keep the report detailed.
+Do not provide final diagnosis.
+Do not prescribe medications.
+
+""", patientName, patientPastHistory, currentProblem);
+
+
 
         // 5️⃣ Send to Ollama and return AI analysis
         String aiResponse = olamaService.getCompletion(combinedPrompt);

@@ -8,3 +8,4 @@ public interface MedicineRepository extends JpaRepository<Medicine, Integer>
 {
 
 }
+

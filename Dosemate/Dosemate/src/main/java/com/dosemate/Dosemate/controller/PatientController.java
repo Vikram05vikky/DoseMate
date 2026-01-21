@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dosemate.Dosemate.DTO.PatientVisitDTO;
+import com.dosemate.Dosemate.model.MedicineReminder;
 import com.dosemate.Dosemate.model.PatientInfo;
+import com.dosemate.Dosemate.repo.MedicineReminderRepository;
 import com.dosemate.Dosemate.repo.PatientInfoRepository;
 import com.dosemate.Dosemate.service.PatientService;
 
@@ -25,6 +27,9 @@ public class PatientController {
 
     @Autowired
     private PatientService patientService;
+
+    @Autowired
+private MedicineReminderRepository medicineReminderRepo;
 
     @Autowired
     private PatientInfoRepository repo;
@@ -63,9 +68,14 @@ public class PatientController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/{patientId}/prescriptions")
-    public PatientVisitDTO getPatientHistory(@PathVariable int patientId) {
-        return patientService.getPatientVisitHistory(patientId);
-    }
+    // @GetMapping("/{patientId}/prescriptions")
+    // public PatientVisitDTO getPatientHistory(@PathVariable int patientId) {
+    //     return patientService.getPatientVisitHistory(patientId);
+    // }
+
+    @GetMapping("/reminders/{patientId}")
+public List<MedicineReminder> getReminders(@PathVariable int patientId) {
+    return medicineReminderRepo.findByPatientId(patientId);
+}
 
 }
