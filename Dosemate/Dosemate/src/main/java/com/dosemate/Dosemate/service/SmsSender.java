@@ -1,76 +1,16 @@
 package com.dosemate.Dosemate.service;
 
-import com.dosemate.Dosemate.DTO.TwilioAccount;
-import com.twilio.Twilio;
-import com.twilio.rest.api.v2010.account.Message;
-import org.springframework.stereotype.Service;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.sns.SnsClient;
-import software.amazon.awssdk.services.sns.model.PublishRequest;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-//@Service
-//public class SmsSender {
-//
-//    private final SnsClient snsClient;
-//
-//    public SmsSender() {
-//        // Your AWS credentials
-//        AwsBasicCredentials awsCreds = AwsBasicCredentials.create(
-//                "AKIAZRHAY3G6HNMPKDY5",
-//                "7fYldeG23iTUHDWs4FHD4f3UwwdfEhYW4vsxN3Zs"
-//        );
-//
-//        this.snsClient = SnsClient.builder()
-//                .region(Region.US_WEST_1) // India region
-//                .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
-//                .build();
-//    }
-//
-//    public void sendSms(String phoneNumber, String message) {
-//        PublishRequest request = PublishRequest.builder()
-//                .message(message)
-//                .phoneNumber("+91" + phoneNumber) // India country code
-//                .build();
-//
-//        snsClient.publish(request);
-//    }
-//}
+import org.springframework.stereotype.Service;
 
-//@Service
-//public class SmsSender {
-//
-//    // Replace with your Twilio credentials
-//    private static final String ACCOUNT_SID = "AC9f4632fdbea7b0d2d79aa7f592e4c086"; // Your Account SID from Twilio Console
-//    private static final String API_KEY_SID = "SK171f04b821484f15370f3e58b9805d56"; // Your API Key SID
-//    private static final String API_KEY_SECRET = "0ZaaKQln79Przbn37KjBwFFHQcpRyFiH"; // Your API Secret
-//
-//    // Replace with your Twilio phone number
-//    private static final String FROM_PHONE_NUMBER = "+15206524473";
-//
-//    public SmsSender() {
-//        // Initialize Twilio with API Key SID and Secret
-//        Twilio.init(API_KEY_SID, API_KEY_SECRET, ACCOUNT_SID);
-//    }
-//
-//    public void sendSms(String phoneNumber, String message) {
-//        Message.creator(
-//                new com.twilio.type.PhoneNumber("+91" + phoneNumber),
-//                new com.twilio.type.PhoneNumber(FROM_PHONE_NUMBER),
-//                message
-//        ).setMediaUrl(
-//                java.util.Arrays.asList(URI.create("https://dosemateimagesms.s3.us-east-1.amazonaws.com/ChatGPT+Image+Jul+10%2C+2025%2C+08_46_25+PM.png"))
-//        ).create();
-//
-//    }
-//}
+import com.dosemate.Dosemate.DTO.TwilioAccount;
+import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Message;
+
 
 @Service
 public class SmsSender {
