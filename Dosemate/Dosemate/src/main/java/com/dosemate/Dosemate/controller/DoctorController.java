@@ -25,7 +25,10 @@ import com.dosemate.Dosemate.repo.OtherReminderRepository;
 import com.dosemate.Dosemate.service.DoctorService;
 
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin(
+    origins = "https://dose-mate-frontend.vercel.app",
+    allowCredentials = "true"
+)
 @RequestMapping("/api/doctor")
 public class DoctorController {
 

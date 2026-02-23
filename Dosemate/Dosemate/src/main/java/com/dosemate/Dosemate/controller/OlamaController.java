@@ -15,7 +15,10 @@ import com.dosemate.Dosemate.repo.PatientHistoryRepository;
 import com.dosemate.Dosemate.service.OlamaService;
 
 @RestController
-@CrossOrigin(origins = "*")
+@CrossOrigin(
+    origins = "https://dose-mate-frontend.vercel.app",
+    allowCredentials = "true"
+)
 @RequestMapping("/api/olama")
 public class OlamaController {
 

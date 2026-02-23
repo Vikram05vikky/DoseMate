@@ -22,7 +22,10 @@ import com.dosemate.Dosemate.service.PatientService;
 
 @RestController
 @RequestMapping("/api/patient")
-@CrossOrigin(origins = "*")
+@CrossOrigin(
+    origins = "https://dose-mate-frontend.vercel.app",
+    allowCredentials = "true"
+)
 public class PatientController {
 
     @Autowired

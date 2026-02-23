@@ -131,7 +131,10 @@ import com.dosemate.Dosemate.repo.PatientInfoRepository;
 
 @RestController
 @RequestMapping("/api/patient/history")
-@CrossOrigin(origins = "*")
+@CrossOrigin(
+    origins = "https://dose-mate-frontend.vercel.app",
+    allowCredentials = "true"
+)
 public class PatientHistoryController {
 
     private final PatientInfoRepository patientInfoRepository;

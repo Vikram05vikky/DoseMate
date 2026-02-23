@@ -8,13 +8,15 @@ import com.dosemate.Dosemate.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
-@CrossOrigin(origins = "*")
+@CrossOrigin(
+    origins = "https://dose-mate-frontend.vercel.app",
+    allowCredentials = "true"
+)
 public class AdminController {
 
     @Autowired
