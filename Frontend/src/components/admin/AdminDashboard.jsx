@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Users, UserCheck, Activity, FileText, TrendingUp, Clock } from 'lucide-react';
 
 // You will likely have a BASE_URL configured globally, but for now:
-const BASE_URL = 'http://localhost:8080'; // <-- Adjust this to your backend URL
+// const BASE_URL = 'http://localhost:8080'; // <-- Adjust this to your backend URL
+const BASE_URL = 'http://65.2.69.70:8080';
 
 const AdminDashboard = () => {
   // 1. Initialize state to hold all dashboard data

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { FileText, User, Calendar, Pill, Clock, AlertTriangle } from 'lucide-react';
 
-const BASE_URL = 'http://localhost:8080'; // <-- Adjust to your backend URL
+// const BASE_URL = 'http://localhost:8080'; // <-- Adjust to your backend URL
+const BASE_URL = 'http://65.2.69.70:8080';
+
 
 const PrescriptionView = () => {
   const [prescriptions, setPrescriptions] = useState([]);

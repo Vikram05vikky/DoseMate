@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Stethoscope, User, Mail, Phone, Award, Lock, AlertCircle, CheckCircle } from 'lucide-react';
 
-const BASE_URL = 'http://localhost:8080'; // <-- Adjust to your backend URL
+// const BASE_URL = 'http://localhost:8080'; // <-- Adjust to your backend URL
+const BASE_URL = 'http://65.2.69.70:8080';
+
 
 const DoctorRegister = ({ onRegister, onSwitchToLogin }) => {
   const [formData, setFormData] = useState({

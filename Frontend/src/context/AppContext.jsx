@@ -3,7 +3,9 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080';
+// const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = 'http://65.2.69.70:8080';
+
 axios.defaults.baseURL = API_BASE_URL;
 
 const AppContext = createContext();
