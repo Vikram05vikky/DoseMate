@@ -22,7 +22,7 @@ import com.dosemate.Dosemate.service.PatientService;
 
 @RestController
 @RequestMapping("/api/patient")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 public class PatientController {
 
     @Autowired

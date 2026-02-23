@@ -15,7 +15,7 @@ import com.dosemate.Dosemate.repo.PatientHistoryRepository;
 import com.dosemate.Dosemate.service.OlamaService;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 @RequestMapping("/api/olama")
 public class OlamaController {
 

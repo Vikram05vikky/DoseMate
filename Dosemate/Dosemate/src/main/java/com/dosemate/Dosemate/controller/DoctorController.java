@@ -25,7 +25,7 @@ import com.dosemate.Dosemate.repo.OtherReminderRepository;
 import com.dosemate.Dosemate.service.DoctorService;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 @RequestMapping("/api/doctor")
 public class DoctorController {
 

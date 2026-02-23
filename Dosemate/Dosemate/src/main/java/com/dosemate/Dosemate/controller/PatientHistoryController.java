@@ -131,7 +131,7 @@ import com.dosemate.Dosemate.repo.PatientInfoRepository;
 
 @RestController
 @RequestMapping("/api/patient/history")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 public class PatientHistoryController {
 
     private final PatientInfoRepository patientInfoRepository;
